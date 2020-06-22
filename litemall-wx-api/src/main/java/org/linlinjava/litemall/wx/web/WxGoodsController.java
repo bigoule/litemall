@@ -1,6 +1,5 @@
 package org.linlinjava.litemall.wx.web;
 
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.logging.Log;
@@ -129,6 +128,7 @@ public class WxGoodsController {
 				c.put("id", comment.getId());
 				c.put("addTime", comment.getAddTime());
 				c.put("content", comment.getContent());
+				c.put("adminContent", comment.getAdminContent());
 				LitemallUser user = userService.findById(comment.getUserId());
 				c.put("nickname", user == null ? "" : user.getNickname());
 				c.put("avatar", user == null ? "" : user.getAvatar());
@@ -187,6 +187,9 @@ public class WxGoodsController {
 			data.put("attribute", goodsAttributeListTask.get());
 			data.put("brand", brandCallableTask.get());
 			data.put("groupon", grouponRulesCallableTask.get());
+			//SystemConfig.isAutoCreateShareImage()
+			data.put("share", SystemConfig.isAutoCreateShareImage());
+
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -276,12 +279,18 @@ public class WxGoodsController {
 			categoryList = new ArrayList<>(0);
 		}
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("goodsList", goodsList);
-		data.put("count", PageInfo.of(goodsList).getTotal());
-		data.put("filterCategoryList", categoryList);
+		PageInfo<LitemallGoods> pagedList = PageInfo.of(goodsList);
 
-		return ResponseUtil.ok(data);
+		Map<String, Object> entity = new HashMap<>();
+		entity.put("list", goodsList);
+		entity.put("total", pagedList.getTotal());
+		entity.put("page", pagedList.getPageNum());
+		entity.put("limit", pagedList.getPageSize());
+		entity.put("pages", pagedList.getPages());
+		entity.put("filterCategoryList", categoryList);
+
+		// 因为这里需要返回额外的filterCategoryList参数，因此不能方便使用ResponseUtil.okList
+		return ResponseUtil.ok(entity);
 	}
 
 	/**
@@ -303,9 +312,7 @@ public class WxGoodsController {
 		// 查找六个相关商品
 		int related = 6;
 		List<LitemallGoods> goodsList = goodsService.queryByCategory(cid, 0, related);
-		Map<String, Object> data = new HashMap<>();
-		data.put("goodsList", goodsList);
-		return ResponseUtil.ok(data);
+		return ResponseUtil.okList(goodsList);
 	}
 
 	/**
@@ -316,9 +323,7 @@ public class WxGoodsController {
 	@GetMapping("count")
 	public Object count() {
 		Integer goodsCount = goodsService.queryOnSale();
-		Map<String, Object> data = new HashMap<>();
-		data.put("goodsCount", goodsCount);
-		return ResponseUtil.ok(data);
+		return ResponseUtil.ok(goodsCount);
 	}
 
 }

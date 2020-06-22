@@ -1,24 +1,19 @@
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
-import store from './store'
 import 'vant/lib/icon/local.css';
 import '@/assets/scss/global.scss';
 import '@/assets/scss/iconfont/iconfont.css';
 
-import VeeValidate, { Validator } from 'vee-validate';
 import VueCountdown from '@chenfengyuan/vue-countdown';
-import zhCN from 'vee-validate/dist/locale/zh_CN';
+import store from './store'
+
 
 import filters from '@/filter';
 
 Vue.component(VueCountdown.name, VueCountdown);
 Vue.use(filters);
 
-Validator.localize('zh-CN', zhCN);
-Vue.use(VeeValidate, {
-  locale: 'zh-CN'
-});
 
 import { Lazyload, Icon, Cell, CellGroup, loading, Button, Toast } from 'vant';
 Vue.use(Icon);
